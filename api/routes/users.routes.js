@@ -75,6 +75,7 @@ router.route("/users/email/:emailUser").get((req, res, next) => {
 
 
 //REGISTER USER
+
 router.post("/register", 
 [
     check("name", "Nombre inválido")
@@ -129,6 +130,72 @@ router.post("/register",
 })
 
 //////////////////////////////////////////////////////////////////////////
+
+//LOGIN USER
+
+router.post("/login", (req, res, next) => {
+    const user = {
+        email: req.body.email,
+        password: req.body.password
+    }
+    connection.query(`SELECT * from users WHERE email="${user.email}"`, async (error, result) => {
+        const contraseñaUsuario = result[0].password
+        if (result.length === 0 || !(await bcrypt.compare(user.password, contraseñaUsuario))) {
+            res.send("Usuario o contraseña incorrectos")
+        }
+        else {
+            try {
+                const jwtToken = jwt.sign({
+                    email: result[0].email,
+                    userId: result[0].idUsers
+                }, "longer-secret-is-better", {
+                    expiresIn: "1h"
+                });
+                res.status(200).send({
+                    msg: 'Logged in!',
+                    token: jwtToken,
+                    expiresIn: 3600
+                });
+            } catch (error) {
+                next(error)
+            }
+        }  
+    })
+})
+
+//////////////////////////////////////////////////////////////////////////
+
+
+//UPDATE USER (FALLA SI NO HACES UPDATE DE TODAS LAS PROPIEDADES)
+
+router.post("/user/:idUser/update", (req, res, next) => {
+    const userId = req.params.idUser
+    const sqlQuery = `SELECT * FROM users WHERE idUsers=${userId}`
+    connection.query(sqlQuery, (error, response) => {
+        if (error) {
+            return next(error)
+        }
+        else {
+            const userInput = {
+                name: req.body.name,
+                email: req.body.email,
+                telefono: req.body.telefono
+            }
+            connection.query(`UPDATE users SET ? WHERE idUsers=${userId}`, userInput, (error, result) => {
+                if (error) {
+                    next(error)
+                } else {
+                    res.status(200).send({
+                        msg: "Usuario actualizado correctamente",
+                    })
+                    
+                }
+            })
+
+        }
+    })
+})
+
 
 
 module.exports = router
