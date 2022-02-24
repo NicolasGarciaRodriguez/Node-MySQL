@@ -166,32 +166,18 @@ router.post("/login", (req, res, next) => {
 //////////////////////////////////////////////////////////////////////////
 
 
-//UPDATE USER (FALLA SI NO HACES UPDATE DE TODAS LAS PROPIEDADES)
+//UPDATE USER
 
-router.post("/user/:idUser/update", (req, res, next) => {
+router.put("/user/:idUser/update", (req, res, next) => {
     const userId = req.params.idUser
-    const sqlQuery = `SELECT * FROM users WHERE idUsers=${userId}`
-    connection.query(sqlQuery, (error, response) => {
+    const inputData = req.body
+    connection.query(`UPDATE users SET ? WHERE idUsers=${userId}`, inputData, (error, result) => {
         if (error) {
-            return next(error)
-        }
-        else {
-            const userInput = {
-                name: req.body.name,
-                email: req.body.email,
-                telefono: req.body.telefono
-            }
-            connection.query(`UPDATE users SET ? WHERE idUsers=${userId}`, userInput, (error, result) => {
-                if (error) {
-                    next(error)
-                } else {
-                    res.status(200).send({
-                        msg: "Usuario actualizado correctamente",
-                    })
-                    
-                }
-            })
-
+            next(error)
+        } else {
+            res.status(200).send({
+                msg: "Usuario actualizado correctamente",
+            })        
         }
     })
 })
