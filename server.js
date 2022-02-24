@@ -19,6 +19,15 @@ app.use('/api', users)
 
 
 
+// Manejamos los errores
+app.use((req, res, next) => {
+    setImmediate(() => {
+        next(new Error('Something went wrong'));
+    });
+});
+
+
+
 const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Escuchando en el puerto ${PORT}`)

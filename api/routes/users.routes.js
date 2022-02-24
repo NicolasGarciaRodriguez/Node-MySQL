@@ -171,13 +171,35 @@ router.post("/login", (req, res, next) => {
 router.put("/user/:idUser/update", (req, res, next) => {
     const userId = req.params.idUser
     const inputData = req.body
-    connection.query(`UPDATE users SET ? WHERE idUsers=${userId}`, inputData, (error, result) => {
-        if (error) {
-            next(error)
+    connection.query(`SELECT * FROM users WHERE email="${inputData.email}" or telefono="${inputData.telefono}"`, (error, result) => {
+        if (result.length === 0) {
+            connection.query(`UPDATE users SET ? WHERE idUsers=${userId}`, inputData, (error, result) => {
+                if (error) {
+                    next(error)
+                } else {
+                    res.status(200).send({
+                        msg: "Usuario actualizado correctamente",
+                    })        
+                }
+            })
         } else {
-            res.status(200).send({
-                msg: "Usuario actualizado correctamente",
-            })        
+            res.send("Ya existe un usuario con esas credenciales")
+        }
+    })
+})
+
+//////////////////////////////////////////////////////////////////////////
+
+
+//DELETE USER
+
+router.delete("/user/:idUser/delete", (req, res, next) => {
+    const userId = req.params.idUser
+    connection.query(`DELETE FROM users WHERE idUsers=${userId}`, (error, result) => {
+        if (error) {
+            return next(error)
+        } else {
+            res.status(200).send("Usuario eliminado correctamente")
         }
     })
 })
