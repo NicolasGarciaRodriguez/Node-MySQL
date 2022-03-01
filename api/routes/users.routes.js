@@ -10,7 +10,7 @@ const jwt = require("jsonwebtoken")
 //GET ALL USERS
 
 router.route("/users").get((req, res, next) => {
-    const sqlQuery = "SELECT * FROM reservas"
+    const sqlQuery = "SELECT * FROM users"
     connection.query(sqlQuery, (err, response) => {
         if (err) {
             return next(err)
@@ -44,9 +44,9 @@ router.route("/users/:idUser").get((req, res, next) => {
 
 router.route("/users/telefono/:telefonoUser").get((req, res, next) => {
     const userTelefono = req.params.telefonoUser
-    connection.query(`SELECT * FROM users WHERE telefono=${userTelefono}`, (error, response) => {
+    connection.query(`SELECT * FROM users WHERE phone=${userTelefono}`, (error, response) => {
         if (error) {
-            return next(error)
+            res.status(404).send("User not found")
         }
         else {
             res.status(200).json(response)
@@ -62,8 +62,8 @@ router.route("/users/telefono/:telefonoUser").get((req, res, next) => {
 router.route("/users/email/:emailUser").get((req, res, next) => {
     const userEmail = req.params.emailUser
     connection.query(`SELECT * FROM users WHERE email="${userEmail}"`, (error, response) => {
-        if (error) {
-            return next(error)
+        if (response.length === 0) {
+            res.status(404).send("User not found")
         }
         else {
             res.status(200).json(response)
@@ -81,16 +81,20 @@ router.post("/register",
     check("name", "Nombre inválido")
         .not()
         .isEmpty()
-        .isLength({ min: 3, max: 25 }),
-    check("password", "Contraseña inválida")
+        .isLength({ min: 3, max: 30 }),
+    check("surname", "Apellido inválido")
         .not()
         .isEmpty()
-        .isLength({ min: 4 }),
+        .isLength({ min: 3, max: 60 }),
     check("email", "Email inválido")
         .not()
         .isEmpty()
         .isEmail(),
-    check("telefono", "Telefono nválido")
+    check("password", "Contraseña inválida")
+        .not()
+        .isEmpty()
+        .isLength({ min: 4 }),
+    check("phone", "Telefono nválido")
         .not()
         .isEmpty()
         .isMobilePhone()
@@ -105,11 +109,12 @@ router.post("/register",
         bcrypt.hash(req.body.password, 10).then((hash) => {
             const user = {
                 name: req.body.name,
+                surname: req.body.surname,
                 email: req.body.email,
                 password: hash,
-                telefono: req.body.telefono
+                phone: req.body.phone
             }
-            connection.query(`SELECT idUsers FROM users WHERE email="${user.email}" or telefono=${user.telefono}`, (error, result) => {
+            connection.query(`SELECT idUsers FROM users WHERE email="${user.email}" or phone=${user.phone}`, (error, result) => {
                 if (result.length === 0) {
                     console.log(result)
                     const sqlQuery = "INSERT INTO users SET ?"
@@ -139,8 +144,7 @@ router.post("/login", (req, res, next) => {
         password: req.body.password
     }
     connection.query(`SELECT * from users WHERE email="${user.email}"`, async (error, result) => {
-        const contraseñaUsuario = result[0].password
-        if (result.length === 0 || !(await bcrypt.compare(user.password, contraseñaUsuario))) {
+        if (result.length === 0 || !(await bcrypt.compare(user.password, result[0].password))) {
             res.send("Usuario o contraseña incorrectos")
         }
         else {
@@ -171,7 +175,7 @@ router.post("/login", (req, res, next) => {
 router.put("/user/:idUser/update", (req, res, next) => {
     const userId = req.params.idUser
     const inputData = req.body
-    connection.query(`SELECT * FROM users WHERE email="${inputData.email}" or telefono="${inputData.telefono}"`, (error, result) => {
+    connection.query(`SELECT * FROM users WHERE email="${inputData.email}" or phone="${inputData.phone}"`, (error, result) => {
         if (result.length === 0) {
             connection.query(`UPDATE users SET ? WHERE idUsers=${userId}`, inputData, (error, result) => {
                 if (error) {
