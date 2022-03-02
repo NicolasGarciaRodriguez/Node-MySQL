@@ -116,7 +116,6 @@ router.post("/register",
             }
             connection.query(`SELECT idUsers FROM users WHERE email="${user.email}" or phone=${user.phone}`, (error, result) => {
                 if (result.length === 0) {
-                    console.log(result)
                     const sqlQuery = "INSERT INTO users SET ?"
                     connection.query(sqlQuery, user, (err, response) => {
                         if (err) {
