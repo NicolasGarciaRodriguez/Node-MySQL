@@ -46,7 +46,7 @@ router.route("/users/telefono/:telefonoUser").get((req, res, next) => {
     const userTelefono = req.params.telefonoUser
     connection.query(`SELECT * FROM users WHERE phone=${userTelefono}`, (error, response) => {
         if (error) {
-            res.status(404).send("User not found")
+            res.status(404).send({error: "Usuario no encontrado"})
         }
         else {
             res.status(200).json(response)
@@ -125,7 +125,7 @@ router.post("/register",
                         }
                     })
                 } else {
-                    res.status(500).send({error: "Ya existe un usuario con esas credenciales"})
+                    res.status(404).send({error: "Ya existe un usuario con esas credenciales"})
                 }
             })
         })
@@ -143,7 +143,7 @@ router.post("/login", (req, res, next) => {
     }
     connection.query(`SELECT * from users WHERE email="${user.email}"`, async (error, result) => {
         if (result.length === 0 || !(await bcrypt.compare(user.password, result[0].password))) {
-            res.status(500).send({
+            res.status(404).send({
                 error: "email o contraseña incorrectos"
             });
         }
@@ -162,7 +162,7 @@ router.post("/login", (req, res, next) => {
                     expiresIn: 3600
                 });
             } catch (err) {
-                res.status(500).send({
+                res.status(404).send({
                     error: "Error inesperado"
                 });
             }
