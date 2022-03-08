@@ -125,7 +125,8 @@ router.post("/register",
                         }
                     })
                 } else {
-                    res.status(404).send({error: "Ya existe un usuario con esas credenciales"})
+                    res.send("Ya existe un usuario con esas credenciales")
+                    return next(error)
                 }
             })
         })
@@ -143,9 +144,7 @@ router.post("/login", (req, res, next) => {
     }
     connection.query(`SELECT * from users WHERE email="${user.email}"`, async (error, result) => {
         if (result.length === 0 || !(await bcrypt.compare(user.password, result[0].password))) {
-            res.send({
-                error: "email o contraseña incorrectos"
-            });
+            res.send("Email o contraseña incorrectos")
         }
         else {
             try {
@@ -165,6 +164,7 @@ router.post("/login", (req, res, next) => {
                 res.send({
                     error: "Error inesperado"
                 });
+                return next(error)
             }
         }  
     })
