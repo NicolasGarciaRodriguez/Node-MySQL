@@ -125,8 +125,7 @@ router.post("/register",
                         }
                     })
                 } else {
-                    res.send("User already exist")
-                    return next(error)
+                    res.status(500).send({error: "User already exist"})
                 }
             })
         })
@@ -161,7 +160,9 @@ router.post("/login", (req, res, next) => {
                     expiresIn: 3600
                 });
             } catch (error) {
-                next(error)
+                res.status(500).send({
+                    error: "Invalid username or password"
+                });
             }
         }  
     })
