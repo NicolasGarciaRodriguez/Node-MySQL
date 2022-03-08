@@ -143,7 +143,7 @@ router.post("/login", (req, res, next) => {
     }
     connection.query(`SELECT * from users WHERE email="${user.email}"`, async (error, result) => {
         if (result.length === 0 || !(await bcrypt.compare(user.password, result[0].password))) {
-            res.status(404).send({
+            res.send({
                 error: "email o contraseña incorrectos"
             });
         }
@@ -162,7 +162,7 @@ router.post("/login", (req, res, next) => {
                     expiresIn: 3600
                 });
             } catch (err) {
-                res.status(404).send({
+                res.send({
                     error: "Error inesperado"
                 });
             }
