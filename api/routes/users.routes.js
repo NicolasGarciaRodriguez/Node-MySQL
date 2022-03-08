@@ -121,11 +121,11 @@ router.post("/register",
                         if (err) {
                             return next(err)
                         } else {
-                            res.status(200).send("User created")
+                            res.status(200).send("Usuario creado correctamente")
                         }
                     })
                 } else {
-                    res.status(500).send({error: "User already exist"})
+                    res.status(500).send({error: "Ya existe un usuario con esas credenciales"})
                 }
             })
         })
@@ -143,7 +143,9 @@ router.post("/login", (req, res, next) => {
     }
     connection.query(`SELECT * from users WHERE email="${user.email}"`, async (error, result) => {
         if (result.length === 0 || !(await bcrypt.compare(user.password, result[0].password))) {
-            res.send("Usuario o contraseña incorrectos")
+            res.status(500).send({
+                error: "email o contraseña incorrectos"
+            });
         }
         else {
             try {
@@ -159,9 +161,9 @@ router.post("/login", (req, res, next) => {
                     token: jwtToken,
                     expiresIn: 3600
                 });
-            } catch (error) {
+            } catch (err) {
                 res.status(500).send({
-                    error: "Invalid username or password"
+                    error: "Error inesperado"
                 });
             }
         }  
@@ -188,7 +190,7 @@ router.put("/user/:idUser/update", (req, res, next) => {
                 }
             })
         } else {
-            res.send("Ya existe un usuario con esas credenciales")
+            res.status(200).send({msg: "Ya existe un usuario con esas credenciales"})
         }
     })
 })

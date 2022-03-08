@@ -64,10 +64,10 @@ router.post("/reservas/:idUser", (req, res, next) => {
     }
     connection.query("INSERT INTO reservas SET ?", inputData, (error, result) => {
         if (error) {
-            res.status(500).send("Ha ocurrido un error al registrar la reserva")
+            res.status(500).send({msg: "Ha ocurrido un error al registrar la reserva"})
             return next(error)
         } else {
-            res.status(200).send("Reserva registrada correctamente")
+            res.status(200).send({msg: "Reserva registrada correctamente"})
         }
     })
 })
@@ -80,9 +80,9 @@ router.delete("/reservas/:idReserva/delete", (req, res, next) => {
     const reservaId = req.params.idReserva
     connection.query(`DELETE FROM reservas WHERE idReserva=${reservaId}`, (error, result) => {
         if (error) {
-            return next(error)
+            res.status(500).send({msg: "Ha ocurrido un error no se puede eliminar la reserva"})
         } else {
-            res.status(200).send("Reserva eliminada correctamente")
+            res.status(200).send({msg: "Reserva eliminada correctamente"})
         }
     })
 })
