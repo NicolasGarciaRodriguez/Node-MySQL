@@ -155,6 +155,7 @@ router.post("/login", (req, res, next) => {
                     expiresIn: "1h"
                 });
                 res.status(200).send({
+                    user: result[0].email,
                     msg: 'Logged in!',
                     token: jwtToken,
                     expiresIn: 3600
