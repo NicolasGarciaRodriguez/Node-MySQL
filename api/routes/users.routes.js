@@ -4,6 +4,8 @@ const router = express.Router()
 const { check, validationResult, Result } = require("express-validator")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
+const cookieParser = require("cookie-parser")
+
 
 
 
@@ -140,7 +142,7 @@ router.post("/register",
 router.post("/login", (req, res, next) => {
     const user = {
         email: req.body.email,
-        password: req.body.password
+        password: req.body.password,
     }
     connection.query(`SELECT * from users WHERE email="${user.email}"`, async (error, result) => {
         if (result.length === 0 || !(await bcrypt.compare(user.password, result[0].password))) {
@@ -154,6 +156,7 @@ router.post("/login", (req, res, next) => {
                 }, "longer-secret-is-better", {
                     expiresIn: "1h"
                 });
+                res.cookie("session cookie", result[0].email, {expire: new Date() + 9999})
                 res.status(200).send({
                     user: result[0].email,
                     msg: 'Logged in!',
@@ -172,6 +175,19 @@ router.post("/login", (req, res, next) => {
 
 //////////////////////////////////////////////////////////////////////////
 
+
+//LOGOUT
+
+router.post("/logout", (req, res, next) => {
+    try {
+        res.clearCookie("session cookie").send("sesion cerrada")
+    } catch {
+        res.status(500).send("Ha ocurrido un error")
+    }
+})
+
+
+//////////////////////////////////////////////////////////////////////////////
 
 //UPDATE USER
 
