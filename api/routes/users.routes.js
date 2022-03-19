@@ -206,7 +206,7 @@ router.put("/user/:idUser/update", (req, res, next) => {
                 }
             })
         } else {
-            res.status(406).send({msg: "Ya existe un usuario con esas credenciales"})
+            res.status(500).send({msg: "Ya existe un usuario con esas credenciales"})
         }
     })
 })
